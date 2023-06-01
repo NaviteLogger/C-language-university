@@ -50,3 +50,16 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+*/.idea/*
+*/.vscode/*
+*/.vs/*
+*/.git/*
+*/.gitignore
+*/.gitattributes
+*/.gitmodules
+*/.gitkeep
+*/.gitconfig
+*/.gitlab-ci.yml
+*/.gitlab/
+*/.g
