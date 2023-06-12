@@ -508,10 +508,15 @@ void PropagateNet(NET* Net)
 void ComputeOutputError(NET* Net, REAL* Target)
 {
   INT  i;
+  // The output of the output layer.
   REAL Out, Err;
    
+  // Compute the error of the output layer.
   Net->Error = 0;
-  for (i=1; i<=Net->OutputLayer->Units; i++) {
+
+  // Compute the error of the output layer.
+  for (i=1; i<=Net->OutputLayer->Units; i++) 
+  {
     Out = Net->OutputLayer->Output[i];
     Err = Target[i-1]-Out;
     Net->OutputLayer->Error[i] = Net->Gain * Out * (1-Out) * Err;
@@ -519,41 +524,50 @@ void ComputeOutputError(NET* Net, REAL* Target)
   }
 }
 
-
+// Backpropagate the error of one layer.
 void BackpropagateLayer(NET* Net, LAYER* Upper, LAYER* Lower)
 {
   INT  i,j;
   REAL Out, Err;
-   
-  for (i=1; i<=Lower->Units; i++) {
+  
+  // Backpropagate the error of one layer.
+  for (i=1; i<=Lower->Units; i++) 
+  {
+    // Backpropagate the error of one layer.
     Out = Lower->Output[i];
     Err = 0;
-    for (j=1; j<=Upper->Units; j++) {
+    for (j=1; j<=Upper->Units; j++) 
+    {
+      // Backpropagate the error of one layer.
       Err += Upper->Weight[j][i] * Upper->Error[j];
     }
     Lower->Error[i] = Net->Gain * Out * (1-Out) * Err;
   }
 }
 
-
+// Backpropagate the error of the output layer.
 void BackpropagateNet(NET* Net)
 {
   INT l;
    
-  for (l=NUM_LAYERS-1; l>1; l--) {
+  for (l=NUM_LAYERS-1; l>1; l--) 
+  {
     BackpropagateLayer(Net, Net->Layer[l], Net->Layer[l-1]);
   }
 }
 
-
+// Adjust the weights of one layer.
 void AdjustWeights(NET* Net)
 {
   INT  l,i,j;
   REAL Out, Err, dWeight;
    
-  for (l=1; l<NUM_LAYERS; l++) {
-    for (i=1; i<=Net->Layer[l]->Units; i++) {
-      for (j=0; j<=Net->Layer[l-1]->Units; j++) {
+  for (l=1; l<NUM_LAYERS; l++) 
+  {
+    for (i=1; i<=Net->Layer[l]->Units; i++) 
+    {
+      for (j=0; j<=Net->Layer[l-1]->Units; j++) 
+      {
         Out = Net->Layer[l-1]->Output[j];
         Err = Net->Layer[l]->Error[i];
         dWeight = Net->Layer[l]->dWeight[i][j];
@@ -569,45 +583,59 @@ void AdjustWeights(NET* Net)
                       S I M U L A T I N G   T H E   N E T
  ******************************************************************************/
 
-
+// Set the input of the network.
+// This function is called once for every input.
 void SimulateNet(NET* Net, REAL* Input, REAL* Output, REAL* Target, BOOL Training)
 {
+  // Set the input of the network.
   SetInput(Net, Input);
+  // Propagate the signals from the input layer to the output layer.
   PropagateNet(Net);
+  // Get the output of the network.
   GetOutput(Net, Output);
    
+  // Compute the error of the output layer.
   ComputeOutputError(Net, Target);
-  if (Training) {
+
+  // Backpropagate the error of the output layer.
+  if (Training) 
+  {
+    // Backpropagate the error of the output layer.
     BackpropagateNet(Net);
+    // Adjust the weights of one layer.
     AdjustWeights(Net);
   }
 }
 
-
+// Train the network.
 void TrainNet(NET* Net, INT Epochs)
 {
   INT  Year, n;
   REAL Output[M];
 
-  for (n=0; n<Epochs*TRAIN_YEARS; n++) {
+  // Train the network.
+  for (n=0; n<Epochs*TRAIN_YEARS; n++) 
+  {
     Year = RandomEqualINT(TRAIN_LWB, TRAIN_UPB);
     SimulateNet(Net, &(Sunspots[Year-N]), Output, &(Sunspots[Year]), TRUE);
   }
 }
 
-
+// Test the network.
 void TestNet(NET* Net)
 {
   INT  Year;
   REAL Output[M];
 
   TrainError = 0;
-  for (Year=TRAIN_LWB; Year<=TRAIN_UPB; Year++) {
+  for (Year=TRAIN_LWB; Year<=TRAIN_UPB; Year++) 
+  {
     SimulateNet(Net, &(Sunspots[Year-N]), Output, &(Sunspots[Year]), FALSE);
     TrainError += Net->Error;
   }
   TestError = 0;
-  for (Year=TEST_LWB; Year<=TEST_UPB; Year++) {
+  for (Year=TEST_LWB; Year<=TEST_UPB; Year++) 
+  {
     SimulateNet(Net, &(Sunspots[Year-N]), Output, &(Sunspots[Year]), FALSE);
     TestError += Net->Error;
   }
@@ -616,7 +644,7 @@ void TestNet(NET* Net)
              TestError / TestErrorPredictingMean);
 }
 
-
+// Evaluate the network.
 void EvaluateNet(NET* Net)
 {
   INT  Year;
@@ -626,7 +654,8 @@ void EvaluateNet(NET* Net)
   fprintf(f, "\n\n\n");
   fprintf(f, "Year    Sunspots    Open-Loop Prediction    Closed-Loop Prediction\n");
   fprintf(f, "\n");
-  for (Year=EVAL_LWB; Year<=EVAL_UPB; Year++) {
+  for (Year=EVAL_LWB; Year<=EVAL_UPB; Year++) 
+  {
     SimulateNet(Net, &(Sunspots [Year-N]), Output,  &(Sunspots [Year]), FALSE);
     SimulateNet(Net, &(Sunspots_[Year-N]), Output_, &(Sunspots_[Year]), FALSE);
     Sunspots_[Year] = Output_[0];
@@ -657,7 +686,8 @@ int main()
 
   Stop = FALSE;
   MinTestError = MAX_REAL;
-  do {
+  do 
+  {
     TrainNet(&Net, 10);
     TestNet(&Net);
     if (TestError < MinTestError) {
